@@ -50,7 +50,9 @@ export default function DailyPrompt({ onClose, onEntryAdded }: DailyPromptProps)
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save entry')
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage = errorData.error || errorData.details || `Failed to save entry (${response.status})`
+        throw new Error(errorMessage)
       }
 
       const newEntry = await response.json()

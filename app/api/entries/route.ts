@@ -1,42 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ProfitEntry } from '@/types'
-import fs from 'fs'
-import path from 'path'
-
-const dataFilePath = path.join(process.cwd(), 'data', 'entries.json')
-
-// Ensure data directory exists
-function ensureDataDirectory() {
-  const dataDir = path.join(process.cwd(), 'data')
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-}
-
-// Read entries from file
-function readEntries(): ProfitEntry[] {
-  ensureDataDirectory()
-  if (!fs.existsSync(dataFilePath)) {
-    return []
-  }
-  try {
-    const data = fs.readFileSync(dataFilePath, 'utf-8')
-    return JSON.parse(data)
-  } catch (error) {
-    console.error('Error reading entries:', error)
-    return []
-  }
-}
-
-// Write entries to file
-function writeEntries(entries: ProfitEntry[]) {
-  ensureDataDirectory()
-  fs.writeFileSync(dataFilePath, JSON.stringify(entries, null, 2))
-}
+import { getAllEntries, upsertEntry } from '@/lib/supabase'
+import { randomUUID } from 'crypto'
 
 export async function GET() {
   try {
-    const entries = readEntries()
+    const entries = await getAllEntries()
     return NextResponse.json(entries)
   } catch (error) {
     console.error('Error fetching entries:', error)
@@ -72,12 +41,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const entries = readEntries()
-
     // Check if entry for this date already exists
-    const existingIndex = entries.findIndex((e) => e.date === date)
+    const existingEntries = await getAllEntries()
+    const existingEntry = existingEntries.find((e) => e.date === date)
+
     const newEntry: ProfitEntry = {
-      id: existingIndex >= 0 ? entries[existingIndex].id : crypto.randomUUID(),
+      id: existingEntry?.id || randomUUID(),
       date,
       realAccountProfit: parseFloat(realAccountProfit),
       paperTradingProfit: parseFloat(paperTradingProfit),
@@ -85,24 +54,14 @@ export async function POST(request: NextRequest) {
       paperTradingPercentage: parseFloat(paperTradingPercentage),
     }
 
-    if (existingIndex >= 0) {
-      // Update existing entry
-      entries[existingIndex] = newEntry
-    } else {
-      // Add new entry
-      entries.push(newEntry)
-    }
+    const savedEntry = await upsertEntry(newEntry)
 
-    // Sort by date
-    entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-    writeEntries(entries)
-
-    return NextResponse.json(newEntry, { status: existingIndex >= 0 ? 200 : 201 })
+    return NextResponse.json(savedEntry, { status: existingEntry ? 200 : 201 })
   } catch (error) {
     console.error('Error creating entry:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to create entry' },
+      { error: 'Failed to create entry', details: errorMessage },
       { status: 500 }
     )
   }
