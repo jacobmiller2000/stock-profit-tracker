@@ -133,3 +133,25 @@ export async function upsertEntry(entry: Omit<ProfitEntry, 'id'> & { id?: string
     throw error
   }
 }
+
+// Delete entry by ID
+export async function deleteEntry(id: string): Promise<void> {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase not configured')
+  }
+
+  try {
+    const { error } = await supabase
+      .from('profit_entries')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting entry:', error)
+      throw new Error(`Failed to delete entry: ${error.message}`)
+    }
+  } catch (error) {
+    console.error('Error deleting entry:', error)
+    throw error
+  }
+}

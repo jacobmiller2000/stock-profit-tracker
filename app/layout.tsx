@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Stock Profit Tracker',
   description: 'Track your stock market profits and visualize your progress',
+  icons: {
+    icon: '/icon.svg',
+  },
 }
 
 export default function RootLayout({

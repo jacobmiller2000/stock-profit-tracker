@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Top middle dollar sign -->
+  <text x="50" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#22c55e" text-anchor="middle">$</text>
+  
+  <!-- Lower left dollar sign -->
+  <text x="25" y="75" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#22c55e" text-anchor="middle">$</text>
+  
+  <!-- Lower right dollar sign -->
+  <text x="75" y="75" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#22c55e" text-anchor="middle">$</text>
+</svg>

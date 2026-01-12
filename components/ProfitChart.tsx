@@ -76,12 +76,12 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="colorReal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
               </linearGradient>
               <linearGradient id="colorPaper" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#a855f7" stopOpacity={0.1} />
+                <stop offset="5%" stopColor="#eab308" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#eab308" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -100,7 +100,7 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
               type="monotone"
               dataKey="cumulativeReal"
               name="Real Account (Cumulative)"
-              stroke="#3b82f6"
+              stroke="#22c55e"
               fillOpacity={1}
               fill="url(#colorReal)"
             />
@@ -108,7 +108,7 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
               type="monotone"
               dataKey="cumulativePaper"
               name="Paper Trading (Cumulative)"
-              stroke="#a855f7"
+              stroke="#eab308"
               fillOpacity={1}
               fill="url(#colorPaper)"
             />
@@ -147,7 +147,7 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
               type="monotone"
               dataKey="realProfit"
               name="Real Account"
-              stroke="#3b82f6"
+              stroke="#22c55e"
               strokeWidth={2}
               dot={{ r: 4 }}
             />
@@ -155,7 +155,7 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
               type="monotone"
               dataKey="paperProfit"
               name="Paper Trading"
-              stroke="#a855f7"
+              stroke="#eab308"
               strokeWidth={2}
               dot={{ r: 4 }}
             />
@@ -202,7 +202,7 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
               type="monotone"
               dataKey="realPercentage"
               name="Real Account %"
-              stroke="#3b82f6"
+              stroke="#22c55e"
               strokeWidth={2}
               dot={{ r: 4 }}
             />
@@ -210,7 +210,7 @@ export default function ProfitChart({ entries }: ProfitChartProps) {
               type="monotone"
               dataKey="paperPercentage"
               name="Paper Trading %"
-              stroke="#a855f7"
+              stroke="#eab308"
               strokeWidth={2}
               dot={{ r: 4 }}
             />

@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { ProfitEntry } from '@/types'
 import ProfitChart from './ProfitChart'
 import StatsCards from './StatsCards'
 import AddHistoricalData from './AddHistoricalData'
+import EditEntryModal from './EditEntryModal'
 import { format, parseISO } from 'date-fns'
 
 interface DashboardProps {
@@ -13,6 +15,9 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ entries, onRefresh, onManualEntry }: DashboardProps) {
+  const [editingEntry, setEditingEntry] = useState<ProfitEntry | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
   const totalRealProfit = entries.reduce((sum, e) => sum + e.realAccountProfit, 0)
   const totalPaperProfit = entries.reduce((sum, e) => sum + e.paperTradingProfit, 0)
   const totalProfit = totalRealProfit + totalPaperProfit
@@ -25,8 +30,48 @@ export default function Dashboard({ entries, onRefresh, onManualEntry }: Dashboa
     ? entries.reduce((sum, e) => sum + e.paperTradingPercentage, 0) / entries.length
     : 0
 
+  const handleEdit = (entry: ProfitEntry) => {
+    setEditingEntry(entry)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this entry? This cannot be undone.')) {
+      return
+    }
+
+    setDeletingId(id)
+    try {
+      const response = await fetch(`/api/entries/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete entry')
+      }
+
+      onRefresh()
+    } catch (error) {
+      alert('Failed to delete entry. Please try again.')
+      console.error('Error deleting entry:', error)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const handleSaveEdit = (updatedEntry: ProfitEntry) => {
+    onRefresh()
+    setEditingEntry(null)
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
+      {editingEntry && (
+        <EditEntryModal
+          entry={editingEntry}
+          onClose={() => setEditingEntry(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -92,6 +137,9 @@ export default function Dashboard({ entries, onRefresh, onManualEntry }: Dashboa
                     <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
                       Total Profit
                     </th>
+                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -126,6 +174,36 @@ export default function Dashboard({ entries, onRefresh, onManualEntry }: Dashboa
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleEdit(entry)}
+                            className="p-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                            title="Edit entry"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(entry.id)}
+                            disabled={deletingId === entry.id}
+                            className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors disabled:opacity-50"
+                            title="Delete entry"
+                          >
+                            {deletingId === entry.id ? (
+                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 12 5.373 12 12H4z"></path>
+                              </svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
